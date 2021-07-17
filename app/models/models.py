@@ -15,15 +15,17 @@ class Estado(Base):
     __tablename__ = 'estados'
     id = Column(Integer, primary_key=True)
     estado = Column(String(50))
+    latitude = Column(String(15))
+    longitude = Column(String(15))
     uf = Column(String(2), unique=True)
-    regiao = Column(String(20))
+    regiao = Column(String(20), nullable=True)
 
     mesos = relationship('Mesorregiao', back_populates='estado', cascade="all, delete-orphan", passive_deletes=True)
     micros = relationship('Microrregiao', back_populates='estado', cascade="all, delete-orphan", passive_deletes=True)
     cidades = relationship('Cidade', back_populates='estado', cascade="all, delete-orphan", passive_deletes=True)
 
     def __repr__(self):
-        return f"<Estado(id={self.id}, estado={self.estado}, uf={self.uf}, regiao={self.regiao})>"
+        return f"<Estado(id={self.id}, nome={self.nome}, uf={self.uf}, regiao={self.regiao})>"
 
 
 class Mesorregiao(Base):
@@ -32,7 +34,7 @@ class Mesorregiao(Base):
 
     id = Column(Integer, primary_key=True)
     ibge_id = Column(Integer)
-    descricao = Column(String(100))
+    nome = Column(String(100))
     estado_id = Column(Integer, ForeignKey('estados.id', onupdate="CASCADE", ondelete="CASCADE"))
 
     estado = relationship('Estado', back_populates="mesos", cascade="all", passive_deletes=True)
@@ -41,7 +43,7 @@ class Mesorregiao(Base):
     cidades = relationship('Cidade', back_populates="meso", cascade="all, delete-orphan", passive_deletes=True)
 
     def __repr__(self):
-        return f"<Mesorregiao(id={self.id}, ibge_id={self.ibge_id}, descricao={self.descricao},estado_id={self.estado_id})>"
+        return f"<Mesorregiao(id={self.id}, ibge_id={self.ibge_id}, nome={self.nome},estado_id={self.estado_id})>"
 
 
 class Microrregiao(Base):
@@ -50,7 +52,7 @@ class Microrregiao(Base):
 
     id = Column(Integer, primary_key=True)
     ibge_id = Column(Integer)
-    descricao = Column(String(100))
+    nome = Column(String(100))
     estado_id = Column(Integer, ForeignKey(
         'estados.id', onupdate="CASCADE", ondelete="CASCADE"))
     meso_id = Column(Integer, ForeignKey('mesorregioes.id', onupdate="CASCADE", ondelete="CASCADE"))
@@ -60,7 +62,7 @@ class Microrregiao(Base):
     cidades = relationship('Cidade', back_populates="micro", cascade="all, delete-orphan", passive_deletes=True)
 
     def __repr__(self):
-        return f"<Microrregiao(id={self.id}, ibge_id={self.ibge_id}, descricao={self.descricao},estado_id={self.estado_id}, meso_id={self.meso_id})>"
+        return f"<Microrregiao(id={self.id}, ibge_id={self.ibge_id}, nome={self.nome},estado_id={self.estado_id}, meso_id={self.meso_id})>"
 
 
 class Cidade(Base):
@@ -69,10 +71,12 @@ class Cidade(Base):
 
     id = Column(Integer, primary_key=True)
     siafi_id = Column(Integer, unique=True)
-    descricao = Column(String(100))
+    nome = Column(String(100))
     estado_id = Column(Integer, ForeignKey('estados.id', onupdate="CASCADE", ondelete="CASCADE"))
     meso_id = Column(Integer, ForeignKey('mesorregioes.id', onupdate="CASCADE", ondelete="CASCADE"))
     micro_id = Column(Integer, ForeignKey('microrregioes.id', onupdate="CASCADE", ondelete="CASCADE"))
+    ddd = Column(String(2))
+    fuso_horario = Column(String(32))
     capital = Column(Boolean)
     latitude = Column(String(15))
     longitude = Column(String(15))
@@ -83,7 +87,7 @@ class Cidade(Base):
     cnpjs = relationship('Cnpj', back_populates='siafi', cascade="all", passive_deletes=True)
 
     def __repr__(self):
-        return f"<Cidade(id={self.id}, cnpj_id={self.siafi_id}, descricao={self.descricao},estado_id={self.estado_id}, meso_id={self.meso_id}, micro_id={self.micro_id})>"
+        return f"<Cidade(id={self.id}, cnpj_id={self.siafi_id}, nome={self.nome},estado_id={self.estado_id}, meso_id={self.meso_id}, micro_id={self.micro_id})>"
 
 
 class CnaeSecao(Base):
