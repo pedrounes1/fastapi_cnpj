@@ -13,6 +13,8 @@ Base = declarative_base(metadata=meta)
 
 class Estado(Base):
     __tablename__ = 'estados'
+    _prefixo = 'estado_'
+
     id = Column(Integer, primary_key=True)
     estado = Column(String(50))
     latitude = Column(String(15))
@@ -30,7 +32,7 @@ class Estado(Base):
 
 class Mesorregiao(Base):
     __tablename__ = 'mesorregioes'
-    __table_args__ = {'mysql_engine': 'InnoDB'}
+    _prefixo = "meso_"
 
     id = Column(Integer, primary_key=True)
     ibge_id = Column(Integer)
@@ -48,7 +50,7 @@ class Mesorregiao(Base):
 
 class Microrregiao(Base):
     __tablename__ = 'microrregioes'
-    __table_args__ = {'mysql_engine': 'InnoDB'}
+    _prefixo = "micro_"
 
     id = Column(Integer, primary_key=True)
     ibge_id = Column(Integer)
@@ -67,7 +69,7 @@ class Microrregiao(Base):
 
 class Cidade(Base):
     __tablename__ = 'cidades'
-    __table_args__ = {'mysql_engine': 'InnoDB'}
+    _prefixo = 'cidade_'
 
     id = Column(Integer, primary_key=True)
     siafi_id = Column(Integer, unique=True)
