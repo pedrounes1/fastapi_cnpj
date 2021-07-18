@@ -1,0 +1,23 @@
+services:
+  pg:
+    image: postgres
+    container_name: posgres-container
+    restart: always
+    environment: 
+      - POSTGRES_PASSWORD=entralogo
+      - POSTGRES_USER=postgres
+      - PGDATA=/var/lib/postgresql/data
+    volumes:
+      - ./postgresql:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+  fastapi_cnpj:
+    image: tiangolo/uvicorn-gunicorn-fastapi
+    container_name: fastapi_cnpj
+    working_dir: /app
+    volumes:
+        - ./fastapi_cnpj/app:/app
+    ports:
+      - 65432:80
+    command:
+      - /start-reload.sh
