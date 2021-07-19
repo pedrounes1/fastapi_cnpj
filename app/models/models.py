@@ -6,7 +6,7 @@ from utils.funcoes import criaEngine
 from sqlalchemy.sql.schema import MetaData
 
 
-engine = criaEngine(True)
+engine = criaEngine()
 meta = MetaData(bind=engine)
 Base = declarative_base(metadata=meta)
 
