@@ -1,3 +1,4 @@
+from sqlalchemy.exc import IntegrityError
 from fastapi import FastAPI, HTTPException
 from typing import Optional
 from starlette.requests import Request
@@ -5,6 +6,11 @@ from models.models import inicia, deleta
 from seeders.cidades import seedGeral
 from views.cidades import getCidadesLista, getCidade, getMesoLista, getMeso, getMicroLista, getMicro, getEstados
 
+
+"""
+* criar o parametro detalhes: True | False. Detalhes busca os nomes das regiões relacionadas.
+* Faixa DDD?
+"""
 app = FastAPI()
 
 
@@ -35,7 +41,7 @@ def estados(id: Optional[int] = None, listar: Optional[str] = None):
 
 
 @app.get('/mesorregioes/')
-def mesorregioes(id: Optional[int], listar: Optional[str]):
+def mesorregioes(id: Optional[int], listar: Optional[str] = None):
     meso = getMeso(id)
     if not meso or len(meso) == 0:
         raise HTTPException(status_code=404, detail='Mesorregião não encontrada!')
@@ -47,7 +53,7 @@ def mesorregioes(id: Optional[int], listar: Optional[str]):
 
 
 @app.get('/microrregioes/')
-def microrregioes(id: Optional[int], listar: Optional[str]):
+def microrregioes(id: Optional[int], listar: Optional[str] = None):
     micro = getMicro(id)
     if not micro or len(micro) == 0:
         raise HTTPException(status_code=404, detail='Microrregião não encontrado!')
@@ -57,8 +63,11 @@ def microrregioes(id: Optional[int], listar: Optional[str]):
 
 
 @app.get('/cidades/')
-def cidades(id: Optional[int]):
-    cidade = getCidade(id)
+def cidades(id: Optional[int]=None, ddd: Optional[int]=None):
+    if id:
+        cidade = getCidade(id)
+    elif ddd:
+        cidade = getCidade(ddd)
     if not cidade or len(cidade) == 0:
         raise HTTPException(status_code=404, detail='Cidade não encontrada')
     return cidade
@@ -69,8 +78,9 @@ async def trataTables(req: Request):
     args = await req.json()
     if args['op'] == 'inicia':
         inicia()
-        seedGeral()
-        return {'msg': 'Tabelas criadas e dados inseridos com sucesso!'}
+        resposta = seedGeral()
+        return resposta
+
     elif args['op'] == 'deleta':
         deleta()
         return {'msg': 'Já era!'}
