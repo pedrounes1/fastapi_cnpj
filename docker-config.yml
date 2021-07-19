@@ -3,7 +3,7 @@ services:
     image: postgres
     container_name: posgres-container
     restart: always
-    environment: 
+    environment:
       - POSTGRES_PASSWORD=entralogo
       - POSTGRES_USER=postgres
       - PGDATA=/var/lib/postgresql/data
@@ -18,6 +18,6 @@ services:
     volumes:
         - ./fastapi_cnpj/app:/app
     ports:
-      - 65432:80
+      - 2402:80
     command:
       - /start-reload.sh
