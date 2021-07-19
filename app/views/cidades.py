@@ -1,7 +1,9 @@
 from sqlalchemy.sql.functions import count
 from models.models import Cidade, Estado, Mesorregiao, Microrregiao
 from sqlalchemy import select
+from sqlalchemy.exc import ProgrammingError
 from utils.funcoes import consultaDados
+from fastapi import HTTPException
 
 
 def contagem(obj, nome):
@@ -21,16 +23,19 @@ def contagem(obj, nome):
 
 
 def getEstados(id=None):
-    if id:
-        retorno = consultaDados(select(Estado).where(Estado.id == id), False)
-        if len(retorno) == 0:
-            return
-        retorno = contagem(retorno[0], 'estado')
-    else:
-        retorno = consultaDados(select(Estado.id.label('estado_id'), Estado.estado.label('nome')), False)
-        for item in retorno:
-            item = contagem(item, 'estado')
-    return retorno
+    try:
+        if id:
+            retorno = consultaDados(select(Estado).where(Estado.id == id), False)
+            if len(retorno) == 0:
+                return
+            retorno = contagem(retorno[0], 'estado')
+        else:
+            retorno = consultaDados(select(Estado.id.label('estado_id'), Estado.estado.label('nome')), False)
+            for item in retorno:
+                item = contagem(item, 'estado')
+        return retorno
+    except ProgrammingError:
+        raise HTTPException(status_code=404, detail='Tabela não criada!')
 
 
 def getMesoLista(estado_id: int):
@@ -71,8 +76,13 @@ def getCidadesLista(parent_id: int, parent: str):
     return consultaDados(consulta, False)
 
 
-def getCidade(id: int):
-    dados = consultaDados(select(Cidade).where(Cidade.id == id), False)
+def getCidade(param: int):
+    if param > 99:
+        dados = consultaDados(select(Cidade).where(Cidade.id == param), False)
+    else:
+        dados = consultaDados(select(Cidade.id, Cidade.nome, Cidade.estado_id).where(Cidade.ddd == str(param)), False)
+        dados.insert(0, {'qtd': len(dados)})
+
     if len(dados) == 0:
         return
     return dados
