@@ -1,5 +1,6 @@
 import os
 import pandas as pd
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.session import Session
 from models.models import Cidade, Estado, Mesorregiao, Microrregiao
 from utils.funcoes import criaEngine
@@ -38,5 +39,13 @@ def seeder(arquivo: str, model):
 
 
 def seedGeral():
+    retorno = {}
     for arquivo, model in [('estados.csv', Estado), ('Mesorregiões.csv', Mesorregiao), ("Microrregiões.csv", Microrregiao), ('Cidades.csv', Cidade)]:
-        seeder(arquivo, model)
+        try:
+            seeder(arquivo, model)
+            retorno[f'{arquivo[:-4]}'] = 'Inserido com sucesso!'
+        except IntegrityError:
+            sessao.rollback()
+            retorno[f'{arquivo[:-4]}'] = 'Falha! Provavelmente os dados já estão inseridos.'
+
+    return retorno
