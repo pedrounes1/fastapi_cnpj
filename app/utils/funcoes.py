@@ -70,7 +70,7 @@ def processaResposta(res):
     return retorno
 
 
-def consultaDados(consulta, as_df=True, echo=False, processar=True):
+def consultaDados(consulta, as_df=True, processar=True):
     """Função usada para realizar consultas no banco de dados e tratar o retorno.
     Args:
         consulta (Select): Um Select do SQLAlchemy
