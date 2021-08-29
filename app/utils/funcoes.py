@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 from unidecode import unidecode
 
@@ -6,15 +7,53 @@ from sqlalchemy.orm import Session
 
 engine = ''
 
+DOCKER = os.getenv("DOCKER")
+
+
+def p(pasta, arquivo: str):
+    """Função para gerar o path (por isso p) para abrir e exportar os arquivos. `p` é mais curto que "`os.path.join(DIR, "../nome_do_arquivo"`
+
+    Args:
+        arquivo (str): nome do arquivo com extensão a ser aberto/salvo
+
+    Returns:
+        StrPath: Caminho completo para o arquivo, considerando a constante `DIR`.
+    """
+    return os.path.join(pasta, arquivo)
+
+
+def seeder(sessao: Session, pasta: str = None, arquivo: str = None, model=None, df: pd.DataFrame = ""):
+    """
+    Optei por transformar os dataframes em dicts para fazer a inserção ao invés de
+    inserir diretamente o df no banco de dados pois o pandas não possui upsert.
+
+    Args:
+        sessao ([type]): [description]
+        pasta (str): [description]
+        arquivo (str): [description]
+        model ([type]): [description]
+    """
+    if len(df) == 0:
+        dados = pd.read_csv(p(pasta, arquivo))
+        if arquivo.startswith('estados'):
+            dados = dados.rename(columns={'codigo_uf': 'id', 'nome': 'estado'})
+    else:
+        dados = df
+    for item in dados.to_dict(orient='records'):
+        for k, v in item.items():
+            if str(v).lower() in ['nan', 'nat', 'none', 'null']:
+                item[k] = None
+
+        reg = model(**item)
+        sessao.add(reg)
+    sessao.commit()
+
 
 def criaEngine(echo: bool = False):
-    global engine
-    if engine == '':
-        print("To criando a engine!")
-        engine = create_engine('postgresql://postgres:entralogo@pg:5432/cnpj', future=True, echo=echo)
+    if DOCKER:
+        return create_engine('postgresql://postgres:entralogo@pg:5432/cnpj', future=True, echo=echo)
     else:
-        print("Já tenho a engine!")
-    return engine
+        return create_engine('postgresql://postgres:entralogo@localhost:5432/cnpj', future=True, echo=echo)
 
 
 def formataColuna(df, col):
