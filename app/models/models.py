@@ -96,8 +96,7 @@ class CnaeSecao(Base):
     __tablename__ = 'cnae_secoes'
     __table_args__ = {'mysql_engine': 'InnoDB'}
 
-    id = Column(Integer, primary_key=True)
-    cod_secao = Column(String(1))
+    id = Column(String(1), primary_key=True)
     descricao = Column(String(255))
 
     divisoes = relationship('CnaeDivisao', back_populates='secao', cascade="all, delete-orphan", passive_deletes=True)
@@ -112,7 +111,7 @@ class CnaeDivisao(Base):
 
     id = Column(Integer, primary_key=True)
     descricao = Column(String(255))
-    secao_id = Column(Integer, ForeignKey('cnae_secoes.id', onupdate="CASCADE", ondelete="CASCADE"))
+    secao_id = Column(String(1), ForeignKey('cnae_secoes.id', onupdate="CASCADE", ondelete="CASCADE"))
 
     secao = relationship('CnaeSecao', back_populates='divisoes', cascade="all", passive_deletes=True)
     grupos = relationship('CnaeGrupo', back_populates='divisao', cascade="all, delete-orphan", passive_deletes=True)
@@ -174,7 +173,6 @@ class MotivoSituacaoCadastral(Base):
     __table_args__ = {'mysql_engine': 'InnoDB'}
 
     id = Column(Integer, primary_key=True)
-    codigo = Column(Integer, unique=True, nullable=False)
     descricao = Column(String(100))
 
     cnpjs = relationship('Cnpj', back_populates='situacao_motivo', cascade="all, delete-orphan", passive_deletes=True)
@@ -201,7 +199,6 @@ class NaturezaJuridica(Base):
     __table_args__ = {'mysql_engine': 'InnoDB'}
 
     id = Column(Integer, primary_key=True)
-    cod_natureza = Column(Integer, unique=True)
     descricao = Column(String(100))
 
     cnpjs = relationship('Cnpj', back_populates='natureza_juridica', cascade="all, delete-orphan", passive_deletes=True)
@@ -252,27 +249,27 @@ class Cnpj(Base):
     nome_fantasia = Column(String(55))
     data_situacao_cadastral = Column(Date)
     situacao_id = Column(Integer(), ForeignKey('situacoes_cadastrais.id', onupdate="CASCADE", ondelete="CASCADE"))
-    situacao_motivo_id = Column(Integer(), ForeignKey(MotivoSituacaoCadastral.codigo, onupdate="CASCADE", ondelete="CASCADE"))
-    natureza_id = Column(Integer(), ForeignKey(NaturezaJuridica.cod_natureza, onupdate="CASCADE", ondelete="CASCADE"))
+    situacao_motivo_id = Column(Integer(), ForeignKey(MotivoSituacaoCadastral.id, onupdate="CASCADE", ondelete="CASCADE"))
+    natureza_id = Column(Integer(), ForeignKey(NaturezaJuridica.id, onupdate="CASCADE", ondelete="CASCADE"))
     data_inicio_atividade = Column(Date)
     cnae_id = Column(Integer(), ForeignKey(Cnae.id, onupdate="CASCADE", ondelete="CASCADE"))
-    tipo_logradouro = Column(String(20))
-    logradouro = Column(String(60))
-    numero = Column(String(6), nullable=True)
-    complemento = Column(String(156), nullable=True)
-    bairro = Column(String(50), nullable=True)
+    # tipo_logradouro = Column(String(20))
+    # logradouro = Column(String(60))
+    # numero = Column(String(6), nullable=True)
+    # complemento = Column(String(156), nullable=True)
+    # bairro = Column(String(50), nullable=True)
     cep = Column(String(8))
     siafi_id = Column(Integer(), ForeignKey(Cidade.siafi_id, onupdate="CASCADE", ondelete="CASCADE"))
-    ddd_telefone_1 = Column(String(12), nullable=True)
-    ddd_telefone_2 = Column(String(12), nullable=True)
-    ddd_fax = Column(String(12), nullable=True)
-    email = Column(String(115), nullable=True)
+    # ddd_telefone_1 = Column(String(12), nullable=True)
+    # ddd_telefone_2 = Column(String(12), nullable=True)
+    # ddd_fax = Column(String(12), nullable=True)
+    # email = Column(String(115), nullable=True)
     qualificacao_id = Column(Integer(), ForeignKey(Qualificacao.cod_qualificacao, onupdate="CASCADE", ondelete="CASCADE"))
     capital_social = Column(Float, nullable=True)
     porte_id = Column(Integer(), ForeignKey('portes.codigo', onupdate="CASCADE", ondelete="CASCADE"))
-    simples = Column(Integer(), nullable=True)
-    data_opcao_simples = Column(Date, nullable=True)
-    data_exclusao_simples = Column(Date, nullable=True)
+    # simples = Column(Integer(), nullable=True)
+    # data_opcao_simples = Column(Date, nullable=True)
+    # data_exclusao_simples = Column(Date, nullable=True)
     mei = Column(Boolean)
     situacao_especial = Column(String(23), nullable=True)
     data_situacao_especial = Column(Date, nullable=True)
@@ -287,7 +284,6 @@ class Cnpj(Base):
 
 
 def inicia():
-
     Base.metadata.create_all(criaEngine())
 
 
