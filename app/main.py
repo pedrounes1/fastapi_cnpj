@@ -1,9 +1,7 @@
-from sqlalchemy.exc import IntegrityError
 from fastapi import FastAPI, HTTPException
 from typing import Optional
-from starlette.requests import Request
-from models.models import inicia, deleta
-from seeders.cidades import seedGeral
+
+
 from views.cidades import getCidadesLista, getCidade, getMesoLista, getMeso, getMicroLista, getMicro, getEstados
 
 
@@ -15,13 +13,20 @@ app = FastAPI()
 
 
 @app.get('/')
-def read_root():
+def root_app():
+    return [{'tipo': 'Dados Geográficos',
+             'urls': ['/geo/estados/', '/geo/mesorregioes/', '/geo/microrregioes/', '/geo/cidades/']}]
+
+
+@app.get('/geo/')
+def root_geo():
     return getEstados()
 
 
-@app.get('/estados/')
+@app.get('/geo/estados/')
 def estados(id: Optional[int] = None, listar: Optional[str] = None):
-    print(id, listar)
+    if listar:
+        listar = str(listar).lower()
     estado = ''
     if not id:
         return getEstados()
@@ -40,9 +45,11 @@ def estados(id: Optional[int] = None, listar: Optional[str] = None):
     return estado
 
 
-@app.get('/mesorregioes/')
-def mesorregioes(id: Optional[int], listar: Optional[str] = None):
+@app.get('/geo/mesorregioes/')
+def mesorregioes(id: Optional[int] = None, listar: Optional[str] = None):
     meso = getMeso(id)
+    if listar:
+        listar = str(listar).lower()
     if not meso or len(meso) == 0:
         raise HTTPException(status_code=404, detail='Mesorregião não encontrada!')
     if listar == 'microrregioes':
@@ -52,35 +59,55 @@ def mesorregioes(id: Optional[int], listar: Optional[str] = None):
     return meso
 
 
-@app.get('/microrregioes/')
-def microrregioes(id: Optional[int], listar: Optional[str] = None):
-    micro = getMicro(id)
+@app.get('/geo/microrregioes/')
+def microrregioes(id: Optional[int] = None, listar: Optional[str] = None):
+    if id:
+        micro = [getMicro(id)]
+    else:
+        micro = getMicroLista()
+    if listar:
+        listar = str(listar).lower()
     if not micro or len(micro) == 0:
         raise HTTPException(status_code=404, detail='Microrregião não encontrado!')
     if listar == 'cidades':
-        micro['cidades'] = getCidadesLista(id, 'microrregiao')
+        for m in micro:
+            m['cidades'] = getCidadesLista(id, 'microrregiao')
     return micro
 
 
-@app.get('/cidades/')
-def cidades(id: Optional[int]=None, ddd: Optional[int]=None):
+@app.get('/geo/cidades/')
+def cidades(id: Optional[int] = None, ddd: Optional[int] = None):
     if id:
         cidade = getCidade(id)
     elif ddd:
         cidade = getCidade(ddd)
+    else:
+        cidade = getCidadesLista()
     if not cidade or len(cidade) == 0:
         raise HTTPException(status_code=404, detail='Cidade não encontrada')
     return cidade
 
 
-@app.post('/tables/')
-async def trataTables(req: Request):
-    args = await req.json()
-    if args['op'] == 'inicia':
-        inicia()
-        resposta = seedGeral()
-        return resposta
+@app.get('/cnaes/sessoes/')
+def sessoes(id: Optional[str] = None, listar: Optional[str] = None):
+    raise HTTPException(status_code=501, detail='Função não implementada!')
 
-    elif args['op'] == 'deleta':
-        deleta()
-        return {'msg': 'Já era!'}
+
+@app.get('/cnaes/divisoes/')
+def divisoes(id: Optional[str] = None, listar: Optional[str] = None):
+    raise HTTPException(status_code=501, detail='Função não implementada!')
+
+
+@app.get('/cnaes/grupos/')
+def grupos(id: Optional[str] = None, listar: Optional[str] = None):
+    raise HTTPException(status_code=501, detail='Função não implementada!')
+
+
+@app.get('/cnaes/classes/')
+def classes(id: Optional[str] = None, listar: Optional[str] = None):
+    raise HTTPException(status_code=501, detail='Função não implementada!')
+
+
+@app.get('/cnaes/cnaes/')
+def cnaes(id: Optional[str] = None, listar: Optional[str] = None):
+    raise HTTPException(status_code=501, detail='Função não implementada!')
