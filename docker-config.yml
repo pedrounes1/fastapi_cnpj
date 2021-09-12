@@ -4,7 +4,7 @@ services:
     container_name: posgres-container
     restart: always
     environment:
-      - POSTGRES_PASSWORD=entralogo
+      - POSTGRES_PASSWORD=fastapicnpj123
       - POSTGRES_USER=postgres
       - PGDATA=/var/lib/postgresql/data
     volumes:

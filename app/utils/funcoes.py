@@ -51,9 +51,9 @@ def seeder(sessao: Session, pasta: str = None, arquivo: str = None, model=None, 
 
 def criaEngine(echo: bool = False):
     if DOCKER:
-        return create_engine('postgresql://postgres:entralogo@pg:5432/cnpj', future=True, echo=echo)
+        return create_engine('postgresql://postgres:fastapicnpj123@pg:5432/cnpj', future=True, echo=echo)
     else:
-        return create_engine('postgresql://postgres:entralogo@localhost:5432/cnpj', future=True, echo=echo)
+        return create_engine('postgresql://postgres:fastapicnpj123@localhost:5432/cnpj', future=True, echo=echo)
 
 
 def formataColuna(df, col):
