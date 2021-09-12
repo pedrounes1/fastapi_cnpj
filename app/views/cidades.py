@@ -43,18 +43,26 @@ def getMesoLista(estado_id: int):
 
 
 def getMeso(id: int):
-    dados = consultaDados(select(Mesorregiao).where(Mesorregiao.id == id), False)
+    dados = select(Mesorregiao)
+    if id:
+        dados = dados.where(Mesorregiao.id == id)
+    dados = consultaDados(dados, False)
     if len(dados) == 0:
         return
-    return contagem(dados[0], 'mesorregiao')
+
+    retorno = []
+    for meso in dados:
+        retorno.append(contagem(meso, 'mesorregiao'))
+    return retorno
 
 
-def getMicroLista(parent_id: int, parent: str):
-    consulta = select(Microrregiao.id, Microrregiao.nome).order_by(Microrregiao.nome)
-    if parent.lower() == 'estado':
-        consulta = consulta.where(Microrregiao.estado_id == parent_id)
-    elif parent.lower() == 'mesorregiao':
-        consulta = consulta.where(Microrregiao.meso_id == parent_id)
+def getMicroLista(parent_id: int = None, parent: str = None):
+    consulta = select(Microrregiao).order_by(Microrregiao.nome)
+    if parent:
+        if parent.lower() == 'estado':
+            consulta = consulta.where(Microrregiao.estado_id == parent_id)
+        elif parent.lower() == 'mesorregiao':
+            consulta = consulta.where(Microrregiao.meso_id == parent_id)
     return consultaDados(consulta, False)
 
 
@@ -65,14 +73,15 @@ def getMicro(id: int):
     return contagem(dados[0], 'microrregiao')
 
 
-def getCidadesLista(parent_id: int, parent: str):
-    consulta = select(Cidade.id, Cidade.nome).order_by(Cidade.nome)
-    if parent.lower() == 'estado':
-        consulta = consulta.where(Cidade.estado_id == parent_id)
-    elif parent.lower() == 'mesorregiao':
-        consulta = consulta.where(Cidade.meso_id == parent_id)
-    elif parent.lower() == 'microrregiao':
-        consulta = consulta.where(Cidade.micro_id == parent_id)
+def getCidadesLista(parent_id: int = None, parent: str = None):
+    consulta = select(Cidade).order_by(Cidade.nome)
+    if parent:
+        if parent.lower() == 'estado':
+            consulta = consulta.where(Cidade.estado_id == parent_id)
+        elif parent.lower() == 'mesorregiao':
+            consulta = consulta.where(Cidade.meso_id == parent_id)
+        elif parent.lower() == 'microrregiao':
+            consulta = consulta.where(Cidade.micro_id == parent_id)
     return consultaDados(consulta, False)
 
 
