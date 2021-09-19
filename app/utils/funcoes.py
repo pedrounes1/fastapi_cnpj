@@ -22,7 +22,7 @@ def p(pasta, arquivo: str):
     return os.path.join(pasta, arquivo)
 
 
-def seeder(sessao: Session, pasta: str = None, arquivo: str = None, model=None, df: pd.DataFrame = ""):
+def seeder(sessao: Session, arquivo: str = None, model=None, df: pd.DataFrame = ""):
     """
     Optei por transformar os dataframes em dicts para fazer a inserção ao invés de
     inserir diretamente o df no banco de dados pois o pandas não possui upsert.
@@ -34,9 +34,11 @@ def seeder(sessao: Session, pasta: str = None, arquivo: str = None, model=None, 
         model ([type]): [description]
     """
     if len(df) == 0:
-        dados = pd.read_csv(p(pasta, arquivo))
-        if arquivo.startswith('estados'):
+        dados = pd.read_csv(arquivo)
+        if 'estados' in arquivo:
             dados = dados.rename(columns={'codigo_uf': 'id', 'nome': 'estado'})
+        else:
+            dados = dados.rename(columns={'codigo_uf': 'estado_id'})
     else:
         dados = df
     for item in dados.to_dict(orient='records'):
