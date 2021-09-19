@@ -1,4 +1,4 @@
-app/seeders/
+app/data/cnpjs/cnpjs.csv
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
