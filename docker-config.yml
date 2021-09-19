@@ -7,17 +7,21 @@ services:
       - POSTGRES_PASSWORD=fastapicnpj123
       - POSTGRES_USER=postgres
       - PGDATA=/var/lib/postgresql/data
+      - DOCKER=true
     volumes:
-      - ./postgresql:/var/lib/postgresql/data
+      - ./postgresql/data:/var/lib/postgresql/data
+      - ./fastapi_cnpj/criaBanco.sql:/docker-entrypoint-initdb.d/criabanco.sql
     ports:
       - 5432:5432
   fastapi_cnpj:
     image: tiangolo/uvicorn-gunicorn-fastapi
     container_name: fastapi_cnpj
     working_dir: /app
+    environment:
+      - DOCKER=true
     volumes:
         - ./fastapi_cnpj/app:/app
     ports:
-      - 2402:80
+      - 65432:80
     command:
       - /start-reload.sh

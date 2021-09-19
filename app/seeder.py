@@ -10,7 +10,7 @@ from utils.funcoes import criaEngine, seeder
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
-sessao = Session(criaEngine(docker=False))
+sessao = Session(criaEngine())
 
 DIR = os.path.abspath('') + '/seeders'
 
