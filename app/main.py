@@ -1,9 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from typing import Optional
-
-
-from views.cidades import getCidadesLista, getCidade, getMesoLista, getMeso, getMicroLista, getMicro, getEstados
-
+from views.cidades import getCidades, getMeso, getMicro, getEstados
+from views.cnaes import getClasses, getDivisoes, getSecoes, getGrupos, getSubclasses
 
 """
 * criar o parametro detalhes: True | False. Detalhes busca os nomes das regiões relacionadas.
@@ -24,90 +22,123 @@ def root_geo():
 
 
 @app.get('/geo/estados/')
-def estados(id: Optional[int] = None, listar: Optional[str] = None):
+def rota_estados(id: Optional[int] = None, listar: Optional[str] = None):
     if listar:
         listar = str(listar).lower()
-    estado = ''
-    if not id:
-        return getEstados()
-    else:
-        estado = getEstados(id)
-
-    if not estado or len(estado) == 0:
+    estados = getEstados(id)
+    if not estados or len(estados) == 0:
         raise HTTPException(status_code=404, detail='Estado não encontrado!')
-    if listar == 'mesorregioes':
-        estado['mesorregioes'] = getMesoLista(id)
-    elif listar == 'microrregioes':
-        estado['microrregioes'] = getMicroLista(id, 'estado')
-    elif listar == 'cidades':
-        estado['cidades'] = getCidadesLista(id, 'estado')
+    for estado in estados:
+        if listar == 'mesorregioes':
+            estado['mesorregioes'] = getMeso(estado_id=estado['estado_id'])
+        elif listar == 'microrregioes':
+            estado['microrregioes'] = getMicro(parent_id=estado['estado_id'], parent='estado')
+        elif listar == 'cidades':
+            estado['cidades'] = getCidades(parent_id = estado['estado_id'], parent='estado')
 
-    return estado
+    return estados
 
 
 @app.get('/geo/mesorregioes/')
-def mesorregioes(id: Optional[int] = None, listar: Optional[str] = None):
-    meso = getMeso(id)
+def rota_mesorregioes(id: Optional[int] = None, estado_id: Optional[int] = None, listar: Optional[str] = None):
+    mesos = getMeso(id, estado_id)
+    if not mesos or len(mesos) == 0:
+        raise HTTPException(status_code=404, detail='Mesorregião não encontrada!')
     if listar:
         listar = str(listar).lower()
-    if not meso or len(meso) == 0:
-        raise HTTPException(status_code=404, detail='Mesorregião não encontrada!')
     if listar == 'microrregioes':
-        meso['microrregioes'] = getMicroLista(id, 'mesorregiao')
+        for meso in mesos:
+            meso['microrregioes'] = getMicro(parent_id=meso['meso_id'], parent='mesorregiao')
     if listar == 'cidades':
-        meso['cidades'] = getCidadesLista(id, 'mesorregiao')
-    return meso
+        for meso in mesos:
+            meso['cidades'] = getCidades(parent_id=meso['meso_id'], parent='mesorregiao')
+    return mesos
 
 
 @app.get('/geo/microrregioes/')
-def microrregioes(id: Optional[int] = None, listar: Optional[str] = None):
-    if id:
-        micro = [getMicro(id)]
-    else:
-        micro = getMicroLista()
+def rota_microrregioes(id: Optional[int] = None, listar: Optional[str] = None):
+    micros = getMicro(id)
     if listar:
         listar = str(listar).lower()
-    if not micro or len(micro) == 0:
+    if not micros or len(micros) == 0:
         raise HTTPException(status_code=404, detail='Microrregião não encontrado!')
     if listar == 'cidades':
-        for m in micro:
-            m['cidades'] = getCidadesLista(id, 'microrregiao')
-    return micro
+        for micro in micros:
+            micro['cidades'] = getCidades(parent_id=micro['micro_id'], parent='microrregiao')
+    return micros
 
 
 @app.get('/geo/cidades/')
-def cidades(id: Optional[int] = None, ddd: Optional[int] = None):
-    if id:
-        cidade = getCidade(id)
-    elif ddd:
-        cidade = getCidade(ddd)
-    else:
-        cidade = getCidadesLista()
-    if not cidade or len(cidade) == 0:
+def rota_cidades(id: Optional[int] = None, ddd: Optional[str] = None):
+    cidades = getCidades(ddd, id)
+    if not cidades or len(cidades) == 0:
         raise HTTPException(status_code=404, detail='Cidade não encontrada')
-    return cidade
+    return cidades
 
 
-@app.get('/cnaes/sessoes/')
-def sessoes(id: Optional[str] = None, listar: Optional[str] = None):
-    raise HTTPException(status_code=501, detail='Função não implementada!')
+@app.get('/cnaes/secoes/')
+def rota_secoes(id: Optional[str] = None, listar: Optional[str] = None):
+    secoes =  getSecoes(id)
+    listar = listar.lower() if listar else None
+    for secao in secoes:
+        if listar == 'divisoes':
+            secao['divisoes'] = ['abuble','is','a','good','placeholder']
+        elif listar == 'grupos':
+            secao['grupos'] = ['abuble','is','a','good','placeholder']
+        elif listar == 'classes':
+            secao['classes'] = ['abuble','is','a','good','placeholder']
+        elif listar == 'subclasses':
+            secao['subclasses'] = ['abuble','is','a','good','placeholder']
+    return secoes
+    # raise HTTPException(status_code=501, detail='Função não implementada!')
 
 
 @app.get('/cnaes/divisoes/')
-def divisoes(id: Optional[str] = None, listar: Optional[str] = None):
-    raise HTTPException(status_code=501, detail='Função não implementada!')
+def rota_divisoes(id: Optional[str] = None, listar: Optional[str] = None):
+    divisoes =  getDivisoes(id)
+    listar = listar.lower() if listar else None
+    for divisao in divisoes:
+        if listar == 'grupos':
+            divisao['grupos'] = ['abuble','is','a','good','placeholder']
+        elif listar == 'classes':
+            divisao['classes'] = ['abuble','is','a','good','placeholder']
+        elif listar == 'subclasses':
+            divisao['subclasses'] = ['abuble','is','a','good','placeholder']
+    return divisoes
 
 
 @app.get('/cnaes/grupos/')
-def grupos(id: Optional[str] = None, listar: Optional[str] = None):
-    raise HTTPException(status_code=501, detail='Função não implementada!')
+def rota_grupos(id: Optional[str] = None, listar: Optional[str] = None):
+    grupos =  getGrupos(id)
+    listar = listar.lower() if listar else None
+    for grupo in grupos:
+        if listar == 'classes':
+            grupo['classes'] = ['abuble','is','a','good','placeholder']
+        elif listar == 'subclasses':
+            grupo['subclasses'] = ['abuble','is','a','good','placeholder']
+    return grupos
 
 
 @app.get('/cnaes/classes/')
-def classes(id: Optional[str] = None, listar: Optional[str] = None):
-    raise HTTPException(status_code=501, detail='Função não implementada!')
+def rota_classes(id: Optional[str] = None, listar: Optional[str] = None):
+    classes =  getClasses(id)
+    listar = listar.lower() if listar else None
+    for classe in classes:
+        if listar == 'subclasses':
+            classe['subclasses'] = ['abuble','is','a','good','placeholder']
+    return classes
 
 
 @app.get('/cnaes/cnaes/')
-def cnaes(id: Optional[str] = None, listar: Optional[str] = None):
-    raise HTTPException(status_code=501, detail='Função não implementada!')
+def rota_cnaes(id: Optional[str] = None, secao: Optional[str] = None, divisao: Optional[int] = None, grupo: Optional[int] = None, classe: Optional[int] = None):
+    if secao:
+        retorno = getSubclasses(parent='secao',parent_id=secao.upper())
+    elif divisao:
+        retorno = getSubclasses(parent='divisao',parent_id=divisao)
+    elif grupo:
+        retorno = getSubclasses(parent='grupo',parent_id=grupo)
+    elif classe:
+        retorno = getSubclasses(parent='classe',parent_id=classe)
+    else:
+        retorno = getSubclasses(id)
+    return retorno

@@ -95,6 +95,7 @@ class Cidade(Base):
 class CnaeSecao(Base):
     __tablename__ = 'cnae_secoes'
     __table_args__ = {'mysql_engine': 'InnoDB'}
+    _prefixo = 'cnae_secao_'
 
     id = Column(String(1), primary_key=True)
     descricao = Column(String(255))
@@ -108,6 +109,7 @@ class CnaeSecao(Base):
 class CnaeDivisao(Base):
     __tablename__ = 'cnae_divisoes'
     __table_args__ = {'mysql_engine': 'InnoDB'}
+    _prefixo = 'cnae_divisao_'
 
     id = Column(Integer, primary_key=True)
     descricao = Column(String(255))
@@ -123,6 +125,7 @@ class CnaeDivisao(Base):
 class CnaeGrupo(Base):
     __tablename__ = 'cnae_grupos'
     __table_args__ = {'mysql_engine': 'InnoDB'}
+    _prefixo = 'cnae_grupo_'
 
     id = Column(Integer, primary_key=True)
     cod_grupo = Column(String(5))
@@ -139,6 +142,7 @@ class CnaeGrupo(Base):
 class CnaeClasse(Base):
     __tablename__ = 'cnae_classes'
     __table_args__ = {'mysql_engine': 'InnoDB'}
+    _prefixo = 'cnae_classe_'
 
     id = Column(Integer, primary_key=True)
     cod_classe = Column(String(10))
@@ -156,6 +160,7 @@ class CnaeClasse(Base):
 class Cnae(Base):
     __tablename__ = 'cnaes'
     __table_args__ = {'mysql_engine': 'InnoDB'}
+    _prefixo = 'cnae_subclasse_'
 
     id = Column(Integer, primary_key=True)
     descricao = Column(String(255))

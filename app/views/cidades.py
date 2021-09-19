@@ -10,50 +10,39 @@ def contagem(obj, nome):
     def cnt(crit_1, crit_2, crit_3):
         return consultaDados(select(count(crit_1)).where(crit_2 == crit_3), False)[0]['count']
     if nome == 'estado':
-        obj['mesorregioes_count'] = cnt(Mesorregiao.id, Mesorregiao.estado_id, obj['estado_id'])
-        obj['microrregioes_count'] = cnt(Microrregiao.id, Microrregiao.estado_id, obj['estado_id'])
-        obj['cidades_count'] = cnt(Cidade.id, Cidade.estado_id, obj['estado_id'])
+        obj['mesorregioes_qtde'] = cnt(Mesorregiao.id, Mesorregiao.estado_id, obj['estado_id'])
+        obj['microrregioes_qtde'] = cnt(Microrregiao.id, Microrregiao.estado_id, obj['estado_id'])
+        obj['cidades_qtde'] = cnt(Cidade.id, Cidade.estado_id, obj['estado_id'])
 
     elif nome == 'mesorregiao':
-        obj['cidades_count'] = cnt(Cidade.id, Cidade.meso_id, obj['meso_id'])
-        obj['microrregioes_count'] = cnt(Microrregiao.id, Microrregiao.meso_id, obj['meso_id'])
+        obj['cidades_qtde'] = cnt(Cidade.id, Cidade.meso_id, obj['meso_id'])
+        obj['microrregioes_qtde'] = cnt(Microrregiao.id, Microrregiao.meso_id, obj['meso_id'])
     elif nome == 'microrregiao':
-        obj['cidades_count'] = cnt(Cidade.id, Cidade.micro_id, obj['micro_id'])
+        obj['cidades_qtde'] = cnt(Cidade.id, Cidade.micro_id, obj['micro_id'])
     return obj
 
 
 def getEstados(id=None):
-    try:
-        if id:
-            retorno = consultaDados(select(Estado).where(Estado.id == id), False)
-            if len(retorno) == 0:
-                return
-            retorno = contagem(retorno[0], 'estado')
-        else:
-            retorno = consultaDados(select(Estado.id.label('estado_id'), Estado.estado.label('nome')), False)
-            for item in retorno:
-                item = contagem(item, 'estado')
-        return retorno
-    except ProgrammingError:
-        raise HTTPException(status_code=404, detail='Tabela não criada!')
+    dados  = select(
+        Estado.id.label('estado_id'),
+        Estado.estado.label('nome'),
+        Estado.uf,
+        Estado.latitude,
+        Estado.longitude)
+    if id:
+        dados = dados.where(Estado.id == id)
+    retorno = consultaDados(dados, False)
 
+    return [contagem(x, 'estado') for x in retorno]
 
-def getMesoLista(estado_id: int):
-    return consultaDados(select(Mesorregiao.id, Mesorregiao.nome).where(Mesorregiao.estado_id == estado_id).order_by(Mesorregiao.nome), False)
-
-
-def getMeso(id: int):
+def getMeso(id: int, estado_id: int = None):
     dados = select(Mesorregiao)
     if id:
         dados = dados.where(Mesorregiao.id == id)
-    dados = consultaDados(dados, False)
-    if len(dados) == 0:
-        return
+    elif estado_id:
+        dados = dados.where(Mesorregiao.estado_id == estado_id).order_by(Mesorregiao.nome)
 
-    retorno = []
-    for meso in dados:
-        retorno.append(contagem(meso, 'mesorregiao'))
-    return retorno
+    return [contagem(meso, "mesorregiao") for meso in consultaDados(dados, False)]
 
 
 def getMicroLista(parent_id: int = None, parent: str = None):
@@ -66,11 +55,29 @@ def getMicroLista(parent_id: int = None, parent: str = None):
     return consultaDados(consulta, False)
 
 
-def getMicro(id: int):
-    dados = consultaDados(select(Microrregiao).where(Microrregiao.id == id), False)
-    if len(dados) == 0:
-        return
-    return contagem(dados[0], 'microrregiao')
+def getMicro(id: int = None, parent: str = None, parent_id: int = None):
+    dados = select(Microrregiao).order_by(Microrregiao.nome)
+    if id:
+        dados = dados.where(Microrregiao.id == id)
+    if parent == 'estado':
+        dados = dados.where(Microrregiao.estado_id == parent_id)
+    elif parent == 'mesorregiao':
+        dados = dados.where(Microrregiao.meso_id == parent_id)
+    return [contagem(micro, 'microrregiao') for micro in consultaDados(dados, False)]
+
+
+def getCidades(ddd: str = None, id: int = None, parent: str = None, parent_id: int = None):
+    dados = select(Cidade).order_by(Cidade.nome)
+    if id:
+        dados = dados.where(Cidade.id == id)
+    elif ddd:
+        dados = dados.where(Cidade.ddd == ddd)
+
+    if parent == 'estado':
+        dados = dados.where(Cidade.estado_id == parent_id)
+    elif parent == 'mesorregiao':
+        dados = dados.where(Cidade.meso_id == parent_id)
+    return consultaDados(dados, False)
 
 
 def getCidadesLista(parent_id: int = None, parent: str = None):
