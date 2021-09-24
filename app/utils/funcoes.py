@@ -1,5 +1,6 @@
 import os
 import pandas as pd
+import numpy as np
 from unidecode import unidecode
 
 from sqlalchemy import create_engine
@@ -22,16 +23,15 @@ def p(pasta, arquivo: str):
     return os.path.join(pasta, arquivo)
 
 
-def seeder(sessao: Session, arquivo: str = None, model=None, df: pd.DataFrame = ""):
-    """
-    Optei por transformar os dataframes em dicts para fazer a inserção ao invés de
-    inserir diretamente o df no banco de dados pois o pandas não possui upsert.
+def seeder(sessao: Session, arquivo: str = None, model=None, df: pd.DataFrame = "", logging=None):
+    """Função utilizada para inserir os dados no banco.
+    Os dados podem ser passados como `pd.DataFrame` ou como arquivos `.csv`. Os `.csv`s serão importados no pandas para inserção dos dados.
 
     Args:
-        sessao ([type]): [description]
-        pasta (str): [description]
-        arquivo (str): [description]
-        model ([type]): [description]
+        sessao (Session): Sessão de acesso ao bd
+        arquivo (str, optional): Caminho para o arquivo a ser aberto. Defaults to None.
+        model (sqlalchemy.Model, optional): Model dos dados a serem inseridos. Defaults to None.
+        df (pd.DataFrame, optional): DataFrame com os dados a serem inseridos. Defaults to "".
     """
     if len(df) == 0:
         dados = pd.read_csv(arquivo)
@@ -41,14 +41,16 @@ def seeder(sessao: Session, arquivo: str = None, model=None, df: pd.DataFrame = 
             dados = dados.rename(columns={'codigo_uf': 'estado_id'})
     else:
         dados = df
-    for item in dados.to_dict(orient='records'):
-        for k, v in item.items():
-            if str(v).lower() in ['nan', 'nat', 'none', 'null']:
-                item[k] = None
+    dados = dados.replace("NULL", np.nan)
+    dados = dados.where(pd.notnull(dados), None)
 
-        reg = model(**item)
-        sessao.add(reg)
-    sessao.commit()
+    if len(dados) > 6000:
+        with sessao.get_bind().connect() as conn:
+            with conn.begin():
+                conn.execute(model.__table__.insert(), dados.to_dict(orient='records'))
+    else:
+        sessao.bulk_insert_mappings(model, dados.to_dict(orient='records'))
+        sessao.commit()
 
 
 def criaEngine(echo: bool = False):
