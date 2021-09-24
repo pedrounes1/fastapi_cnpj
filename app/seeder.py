@@ -151,7 +151,6 @@ def postCnpjs():
 
             if len(chunk) > 0:
                 try:
-                    logging.info("Vou inserir...")
                     seeder(sessao=sessao, model=Cnpj, df=chunk, logging=logging)
                     logging.info('dados inseridos!')
                 except IntegrityError as e:
