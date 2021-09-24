@@ -19,26 +19,38 @@ Esse repositório foi criado com o objetivo de ser um back-end que disponibiliza
 Como o volume de dados é absolutamente massivo, optei por trabalhar apenas com as empresas do Estado do Paraná, que estão ativas ou que fecharam a partir de 01/01/2016.
 
 ### Uso:
-O repositório contém apenas o código fonte para processamento e exibição dos dados. Os dados em si precisam ser baixados de suas respectivas fontes:
+O repositório contém apenas o código fonte para processamento e exibição dos dados. Os dados geográficos e de CNAEs são obtidos diretamente de outros repositórios do github. Já os de CNPJ precisam ser baixados, conforme abaixo:
 #### Dados geográficos:
-Os dados geográficos podem ser obtidos no repositório [Monicipios-Brasileiros](https://github.com/pedrounes1/Municipios-Brasileiros) e os arquivos `csv` devem ser copiados para `./app/seeders/cidades`
+Os dados geográficos são importados diretamente do repositório [Municipios-Brasileiros](https://github.com/pedrounes1/Municipios-Brasileiros)
 
 #### Dados CNAEs:
-Os dados de Cnaes e suas subdivisões podem ser obtidos no repositório [CNAES-IBGE-2_3](https://github.com/pedrounes1/CNAES-IBGE-2_3). Os arquivos `.csv` também devem ser salvos em `./app/seeders/cnaes`
+Os dados de Cnaes e suas subdivisões são obtidos diretamente no repositório [CNAES-IBGE-2_3](https://github.com/pedrounes1/CNAES-IBGE-2_3).
 
 #### Dados CNPJs:
 Os dados de CNPJ podem ser obtidos no repositorio do [George Santiago](https://github.com/georgevbsantiago/qsacnpj). Nesse repo, você deve baixar a *Base de dados do CNPJ - CSV*, extrair os arquivos e salvar o arquivo `cnpj_dados_cadastrais_pj.csv` em `./app/seeders/cnpjs` como `cnpjs.csv`
 
 
 #### Instalação:
-Depois de baixar todos os arquivos, renomeie o arquivo `docker-config.yml` para `docker-compose.yml` e rode o comando `docker-compose up` no terminal de dentro da pasta com o código fonte.
+Depois de baixar todos os arquivos, renomeie o arquivo `docker-config.yml` para `docker-compose.yml` (ou mova o conteúdo do arquivo para o seu `docker-compose.yml`) e rode o comando `docker-compose up` no terminal de dentro da pasta com o código fonte.
 
-Após a criação dos containers, crie um banco no postgres chamado `cnpj` e execute o arquivo `app/seeder.py` para inserir todos os dados no banco. Esse processo só precisa ser realizado uma vez.
+Após a criação dos containers, execute o arquivo `app/seeder.py` para inserir todos os dados no banco. Esse processo só precisa ser realizado uma vez.
 
 O container, por padrão, responde a requisições REST na porta 65432.
 
+Até o momento, os endpoints funcionais são:
+- /geo/ 
+- /geo/estados 
+- /geo/mesorregioes
+- /geo/microrregiões
+- /geo/cidades
+- /cnaes/secoes
+- /cnaes/divisoes
+- /cnaes/grupos
+- /cnaes/classes
+- /cnaes/cnaes
+
 ## TODO:
-[ ] Finalizar os endpoints para CNAEs e CNPJs;
-[ ] Documentar a API
-[ ] Finalizar a análise dos dados
-[ ] Criar uma rotina de testes
+- [ ] Finalizar os endpoints para CNAEs e CNPJs;
+- [ ] Documentar a API;
+- [ ] Finalizar a análise dos dados;
+- [ ] Criar uma rotina de testes;
