@@ -16,7 +16,7 @@ Esse repositório foi criado com o objetivo de ser um back-end que disponibiliza
 * Obter insights sobre mercados em expansão, mercados em retração, concentração de empresas de certos segmentos, entre outros;
 
 ## Limitações:
-Como o volume de dados é absolutamente massivo, optei por trabalhar apenas com as empresas do Estado do Paraná, que estão ativas ou que fecharam a partir de 01/01/2016.
+Como o volume de dados é massivo, optei por trabalhar apenas com as empresas que estão ativas ou que fecharam a partir de 01/01/2013.
 
 ### Uso:
 O repositório contém apenas o código fonte para processamento e exibição dos dados. Os dados geográficos e de CNAEs são obtidos diretamente de outros repositórios do github. Já os de CNPJ precisam ser baixados, conforme abaixo:
